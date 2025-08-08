@@ -4,16 +4,12 @@ import { Button } from './ui/button'
 
 export default function LoginButton() {
   const { data: session } = useSession()
-  
   if (session){
     return (
-      <Button onClick={() => signOut}>Logout</Button>
+        <Button onClick={() => signOut()} variant={"secondary"} className='cursor-pointer'>Logout</Button>
     )
   }
   return (
-    <>
-      {/* <Avatar></Avatar> */}
-      <Button onClick={() => signIn()} variant={"default"} className='cursor-pointer'>Login</Button>
-    </>
+    <Button onClick={() => signIn()} variant={"default"} className='cursor-pointer'>Login</Button>
   )
 }
