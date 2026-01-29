@@ -25,7 +25,6 @@ export default function Hero() {
       <div className="h-[90vh] w-screen flex items-center justify-evenly text-2xl font-extralight">
         <span className="h-60 w-100 border-2 rounded flex justify-center items-center">Video Call</span>
         <span className="h-60 w-100 border-2 rounded flex justify-center items-center">Sketch</span>
-        <span className="h-60 w-100 border-2 rounded flex justify-center items-center">Coding labs</span>
       </div>
     </div>
   )

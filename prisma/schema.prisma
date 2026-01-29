@@ -15,3 +15,7 @@ datasource db {
 
 
 // define schemas here
+
+model user {}
+
+model meetings {}
