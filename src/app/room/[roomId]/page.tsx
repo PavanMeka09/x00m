@@ -1,5 +1,5 @@
-import { auth } from "@/app/auth";
 import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/lib/userData";
 
 type Props = {
   params: {
@@ -8,16 +8,16 @@ type Props = {
 };
 
 export default async function RoomPage({ params }: Props) {
-  const session = await auth();
+  const user = await getCurrentUser();
 
-  if (!session) {
+  if (!user) {
     redirect("/");
   }
 
   return (
     <div>
       <h1>Room: {params.roomId}</h1>
-      <p>Welcome {session.user?.name}</p>
+      <p>Welcome {user.name}</p>
     </div>
   );
 }
