@@ -3,7 +3,10 @@ import { signIn, signOut, useSession } from 'next-auth/react'
 import { Button } from './ui/button'
 
 export default function LoginButton() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
+  if ( status === "loading" ) {
+    return null
+  }
   if (session){
     return (
         <Button onClick={() => signOut()} variant={"secondary"} className='cursor-pointer'>Logout</Button>

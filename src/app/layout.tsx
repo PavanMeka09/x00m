@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Source_Serif_4, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { SessionProvider } from "next-auth/react"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -29,7 +30,10 @@ export default function RootLayout({
       <body
         className={`${inter.className} ${sourceSerif4.className} ${jetBrainsMono.className} antialiased`}
         >
+          
+              <SessionProvider>
           {children}
+              </SessionProvider>
         </body>
     </html>
   );
