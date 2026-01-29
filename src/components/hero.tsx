@@ -1,14 +1,25 @@
-import React from 'react'
+"use client"
+
 import { Button } from './ui/button'
 import LoginButton from './loginButton'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 
 export default function Hero() {
+
+  const { data: session } = useSession()
+
   return (
     <div className="h-screen w-screen flex items-center justify-center flex-col">
       <nav className="h-[10vh] w-screen px-10 flex items-center justify-between">
         <h1 className="text-3xl font-bold italic">x00m</h1>
-        <LoginButton />
+
+        <div className='flex justify-center items-center gap-2'>
+          {session && (<><img className='rounded-full h-10' src={session?.user?.image} alt="profile pic" />
+          <h1>{session?.user?.name}</h1></>)
+          }
+          <LoginButton />
+        </div>
       </nav>
       <span className='flex gap-10'>
         <Link href={"/createx00m"}>
