@@ -1,47 +1,67 @@
 import { WebSocketServer, WebSocket } from "ws";
 
-const wss = new WebSocketServer({port: 8080});
+const wss = new WebSocketServer({ port: 8080 });
 
-type signalMessage = {messageType: "JOIN_ROOM", roomId: string, userId: string}
-| {messageType: "OFFER", roomId: string, userId: string}
-| {messageType: "ANSWER", roomId: string, userId: string}
-| {messageType: "ICE", roomId: string, userId: string}
+type SignalMessage =
+  | { type: "JOIN_ROOM"; roomId: string; userId: string }
+  | { type: "PEER_JOINED"; userId: string }
+  | { type: "PEER_LEFT"; userId: string }
+  | { type: "OFFER"; roomId: string; from: string; to: string; sdp: any }
+  | { type: "ANSWER"; roomId: string; from: string; to: string; sdp: any }
+  | { type: "ICE"; roomId: string; from: string; to: string; candidate: any };
 
-const rooms = new Map<string, Set<WebSocket>>()
+type Room = Map<string, WebSocket>;
+const rooms = new Map<string, Room>();
 
-wss.on("connection", (socket: WebSocket) => {
-  console.log("Client connected")
+wss.on("connection", (socket) => {
+  console.log("Client connected");
+
   socket.on("message", (data) => {
-    const msg = JSON.parse(data.toString());
+    let msg: SignalMessage;
+
+    try {
+      msg = JSON.parse(data.toString());
+    } catch {
+      return;
+    }
 
     switch (msg.type) {
       case "JOIN_ROOM": {
-        const { roomId } = msg;
+        const { roomId, userId } = msg;
 
         if (!rooms.has(roomId)) {
-          rooms.set(roomId, new Set());
+          rooms.set(roomId, new Map());
         }
 
-        rooms.get(roomId)!.add(socket);
-        (socket as any).roomId = roomId;
+        const room = rooms.get(roomId)!;
+        room.set(userId, socket);
 
-        console.log(`Client joined room ${roomId}`);
+        (socket as any).roomId = roomId;
+        (socket as any).userId = userId;
+
+        // notify others
+        room.forEach((client, uid) => {
+          if (uid !== userId) {
+            client.send(JSON.stringify({
+              type: "PEER_JOINED",
+              userId
+            }));
+          }
+        });
+
         break;
       }
 
       case "OFFER":
       case "ANSWER":
       case "ICE": {
-        const { roomId } = msg;
-        const clients = rooms.get(roomId);
+        const room = rooms.get(msg.roomId);
+        if (!room) return;
 
-        if (!clients) return;
-
-        clients.forEach((client) => {
-          if (client !== socket && client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify(msg));
-          }
-        });
+        const target = room.get(msg.to);
+        if (target?.readyState === WebSocket.OPEN) {
+          target.send(JSON.stringify(msg));
+        }
 
         break;
       }
@@ -49,23 +69,23 @@ wss.on("connection", (socket: WebSocket) => {
   });
 
   socket.on("close", () => {
-    const roomId = (socket as any).roomId;
-    if (!roomId) return;
+    const { roomId, userId } = socket as any;
+    if (!roomId || !userId) return;
 
-    const clients = rooms.get(roomId);
-    if (!clients) return;
+    const room = rooms.get(roomId);
+    if (!room) return;
 
-    clients.delete(socket);
+    room.delete(userId);
 
-    if (clients.size === 0) {
+    room.forEach((client) => {
+      client.send(JSON.stringify({
+        type: "PEER_LEFT",
+        userId
+      }));
+    });
+
+    if (room.size === 0) {
       rooms.delete(roomId);
     }
-
-    console.log(`Client left room ${roomId}`);
   });
-
-
-  socket.on("error", (err) => {
-    console.error("WebSocket error:", err);
-  });
-})    
+});
