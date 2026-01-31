@@ -12,7 +12,7 @@ export default function page() {
       <Input type="text" name="" id="" className='w-100' maxLength={8} placeholder='meeting id' onChange={(e) => {
         setMeetingId(e.target.value)
       }}/>
-      <Link href={`/call/${meetingId}`}>Join</Link>
+      <Link href={`/room/${meetingId}`}>Join</Link>
     </div>
   )
 }

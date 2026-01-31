@@ -22,7 +22,7 @@ export default function Hero() {
         </div>
       </nav>
       <span className='flex gap-10'>
-        <Link href={"/createx00m"}>
+        <Link href={"/create"}>
           <Button variant={"outline"} className='cursor-pointer'>
             create a meeting
           </Button>
