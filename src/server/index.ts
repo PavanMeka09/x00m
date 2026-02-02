@@ -8,7 +8,7 @@ type SignalMessage =
   | { type: "PEER_LEFT"; userId: string }
   | { type: "OFFER"; roomId: string; from: string; to: string; sdp: any }
   | { type: "ANSWER"; roomId: string; from: string; to: string; sdp: any }
-  | { type: "ICE"; roomId: string; from: string; to: string; candidate: any };
+  | { type: "ICE"; roomId: string;   from: string; to: string; candidate: any };
 
 type Room = Map<string, WebSocket>;
 const rooms = new Map<string, Room>();

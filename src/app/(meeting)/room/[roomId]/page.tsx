@@ -1,14 +1,14 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/userData";
+import RoomClient from "./RoomClient";
 
 type Props = {
-  params: Promise<{
+  params: {
     roomId: string;
-  }>;
+  };
 };
 
 export default async function RoomPage({ params }: Props) {
-  const { roomId } = await params;
   const user = await getCurrentUser();
 
   if (!user) {
@@ -16,9 +16,12 @@ export default async function RoomPage({ params }: Props) {
   }
 
   return (
-    <div>
-      <h1>Room: {roomId}</h1>
-      <p>Welcome {user.name}</p>
-    </div>
+    <RoomClient
+      roomId={params.roomId}
+      user={{
+        id: user.id,
+        name: user.name,
+      }}
+    />
   );
 }
