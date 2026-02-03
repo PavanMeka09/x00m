@@ -19,7 +19,7 @@ export default async function RoomPage({ params }: Props) {
     <RoomClient
       roomId={params.roomId}
       user={{
-        id: user.id,
+        email: user.email,
         name: user.name,
       }}
     />

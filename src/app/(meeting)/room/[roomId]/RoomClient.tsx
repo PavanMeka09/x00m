@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 type Props = {
   roomId: string;
   user: {
-    id: string;
+    email: string;
     name: string;
   };
 };
@@ -35,7 +35,7 @@ export default function RoomClient({ roomId, user }: Props) {
         JSON.stringify({
           type: "JOIN_ROOM",
           roomId,
-          userId: user.id,
+          userEmail: user.email,
         })
       );
       setState("JOINED");
@@ -65,14 +65,14 @@ export default function RoomClient({ roomId, user }: Props) {
     return () => {
       ws.close();
     };
-  }, [roomId, user.id]);
+  }, [roomId, user.email]);
 
   return (
     <div>
       <h1>Room: {roomId}</h1>
 
       <p>
-        <b>User:</b> {user.name} ({user.id})
+        <b>User:</b> {user.name} ({user.email})
       </p>
 
       <p>
