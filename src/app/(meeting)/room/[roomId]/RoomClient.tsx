@@ -22,7 +22,7 @@ type RoomState =
 export default function RoomClient({ roomId, user }: Props) {
   const wsRef = useRef<WebSocket | null>(null);
   const [state, setState] = useState<RoomState>("INIT");
-  const [peerId, setPeerId] = useState<string | null>(null);
+  const [peerEmail, setPeerEmail] = useState<string | null>(null);
 
   useEffect(() => {
     setState("CONNECTING_WS");
@@ -47,12 +47,12 @@ export default function RoomClient({ roomId, user }: Props) {
 
       switch (msg.type) {
         case "PEER_JOINED":
-          setPeerId(msg.userId);
+          setPeerEmail(msg.userEmail);
           setState("NEGOTIATING");
           break;
 
         case "PEER_LEFT":
-          setPeerId(null);
+          setPeerEmail(null);
           setState("WAITING_FOR_PEER");
           break;
       }
@@ -80,7 +80,7 @@ export default function RoomClient({ roomId, user }: Props) {
       </p>
 
       <p>
-        <b>Peer:</b> {peerId ?? "none"}
+        <b>Peer:</b> {peerEmail ?? "none"}
       </p>
 
       {state === "WAITING_FOR_PEER" && (
