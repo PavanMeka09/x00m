@@ -5,15 +5,14 @@ import { useEffect, useRef, useState } from "react";
 type Props = {
   roomId: string;
   user: {
-    email: string;
     name: string;
+    email: string;
   };
 };
 
 type RoomState =
   | "INIT"
   | "CONNECTING_WS"
-  | "JOINED"
   | "WAITING_FOR_PEER"
   | "NEGOTIATING"
   | "CONNECTED"
@@ -21,10 +20,22 @@ type RoomState =
 
 export default function RoomClient({ roomId, user }: Props) {
   const wsRef = useRef<WebSocket | null>(null);
+  const userIdRef = useRef<string | null>(null);
+
   const [state, setState] = useState<RoomState>("INIT");
-  const [peerEmail, setPeerEmail] = useState<string | null>(null);
+  const [peerId, setPeerId] = useState<string | null>(null);
+  const [role, setRole] = useState<"OFFERER" | "ANSWERER" | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  // ✅ generate userId ONLY on client, after mount
+  useEffect(() => {
+    userIdRef.current = crypto.randomUUID().slice(0, 8);
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
+    if (!mounted || !userIdRef.current) return;
+
     setState("CONNECTING_WS");
 
     const ws = new WebSocket("ws://localhost:8080");
@@ -35,10 +46,10 @@ export default function RoomClient({ roomId, user }: Props) {
         JSON.stringify({
           type: "JOIN_ROOM",
           roomId,
-          userEmail: user.email,
+          userId: userIdRef.current,
         })
       );
-      setState("JOINED");
+
       setState("WAITING_FOR_PEER");
     };
 
@@ -46,14 +57,27 @@ export default function RoomClient({ roomId, user }: Props) {
       const msg = JSON.parse(event.data);
 
       switch (msg.type) {
+        case "EXISTING_PEER":
+          setPeerId(msg.userId);
+          setRole("ANSWERER");
+          setState("NEGOTIATING");
+          break;
+
         case "PEER_JOINED":
-          setPeerEmail(msg.userEmail);
+          setPeerId(msg.userId);
+          setRole("OFFERER");
           setState("NEGOTIATING");
           break;
 
         case "PEER_LEFT":
-          setPeerEmail(null);
+          setPeerId(null);
+          setRole(null);
           setState("WAITING_FOR_PEER");
+          break;
+
+        case "ROOM_FULL":
+          alert("Room already has 2 participants");
+          ws.close();
           break;
       }
     };
@@ -65,14 +89,23 @@ export default function RoomClient({ roomId, user }: Props) {
     return () => {
       ws.close();
     };
-  }, [roomId, user.email]);
+  }, [mounted, roomId]);
+
+  // ✅ prevent SSR/client mismatch completely
+  if (!mounted) {
+    return null;
+  }
 
   return (
-    <div>
+    <div style={{ padding: 24 }}>
       <h1>Room: {roomId}</h1>
 
       <p>
-        <b>User:</b> {user.name} ({user.email})
+        <b>User:</b> {user.name}
+      </p>
+
+      <p>
+        <b>User ID:</b> {userIdRef.current}
       </p>
 
       <p>
@@ -80,7 +113,11 @@ export default function RoomClient({ roomId, user }: Props) {
       </p>
 
       <p>
-        <b>Peer:</b> {peerEmail ?? "none"}
+        <b>Peer:</b> {peerId ?? "none"}
+      </p>
+
+      <p>
+        <b>Role:</b> {role ?? "undecided"}
       </p>
 
       {state === "WAITING_FOR_PEER" && (
@@ -88,10 +125,8 @@ export default function RoomClient({ roomId, user }: Props) {
       )}
 
       {state === "NEGOTIATING" && (
-        <p>Peer joined. Preparing connection…</p>
+        <p>Peer detected. Role = {role}. Preparing connection…</p>
       )}
-
-      {state === "CONNECTED" && <p>Connected ✅</p>}
     </div>
   );
 }
