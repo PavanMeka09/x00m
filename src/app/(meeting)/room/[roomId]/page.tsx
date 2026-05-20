@@ -22,7 +22,7 @@ export default async function RoomPage({ params }: Props) {
       roomId={roomId}
       user={{
         email: user.email,
-        name: user.name,
+        name: user.name ?? user.email,
       }}
     />
   );

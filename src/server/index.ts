@@ -8,14 +8,19 @@ type SignalMessage =
   | { type: "EXISTING_PEER"; userId: string }
   | { type: "PEER_LEFT"; userId: string }
   | { type: "ROOM_FULL" }
-  | { type: "OFFER"; roomId: string; from: string; to: string; sdp: any }
-  | { type: "ANSWER"; roomId: string; from: string; to: string; sdp: any }
-  | { type: "ICE"; roomId: string; from: string; to: string; candidate: any };
+  | { type: "OFFER"; roomId: string; from: string; to: string; sdp: RTCSessionDescriptionInit }
+  | { type: "ANSWER"; roomId: string; from: string; to: string; sdp: RTCSessionDescriptionInit }
+  | { type: "ICE"; roomId: string; from: string; to: string; candidate: RTCIceCandidateInit };
 
 type Room = Map<string, WebSocket>;
 const rooms = new Map<string, Room>();
 
-wss.on("connection", (socket) => {
+type RoomSocket = WebSocket & {
+  roomId?: string;
+  userId?: string;
+};
+
+wss.on("connection", (socket: RoomSocket) => {
   socket.on("message", (data) => {
     let msg: SignalMessage;
 
@@ -35,7 +40,7 @@ wss.on("connection", (socket) => {
 
         const room = rooms.get(roomId)!;
 
-        // 🚫 Room full
+        // Room full
         if (room.size >= 2) {
           socket.send(JSON.stringify({ type: "ROOM_FULL" }));
           socket.close();
@@ -55,8 +60,8 @@ wss.on("connection", (socket) => {
 
         // Add user
         room.set(userId, socket);
-        (socket as any).roomId = roomId;
-        (socket as any).userId = userId;
+        socket.roomId = roomId;
+        socket.userId = userId;
 
         // Notify existing peer
         room.forEach((client, uid) => {
@@ -90,7 +95,7 @@ wss.on("connection", (socket) => {
   });
 
   socket.on("close", () => {
-    const { roomId, userId } = socket as any;
+    const { roomId, userId } = socket;
     if (!roomId || !userId) return;
 
     const room = rooms.get(roomId);

@@ -15,8 +15,10 @@ export default function Hero() {
         <h1 className="text-3xl font-bold italic">x00m</h1>
 
         <div className='flex justify-center items-center gap-2'>
-          {session && (<><img className='rounded-full h-10' src={session?.user?.image} alt="profile pic" />
-          <h1>{session?.user?.name}</h1></>)
+          {session && (<>{session.user?.image && (
+            <img className='rounded-full h-10' src={session.user.image} alt="profile pic" />
+          )}
+          <h1>{session.user?.name}</h1></>)
           }
           <LoginButton />
         </div>
