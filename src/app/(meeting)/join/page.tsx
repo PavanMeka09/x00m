@@ -4,7 +4,7 @@ import Link from 'next/link'
 import React, { useState } from 'react'
 import { Input } from '@/components/ui/input'
 
-export default function page() {
+export default function JoinPage() {
   const [meetingId, setMeetingId] = useState('');
 
   return (

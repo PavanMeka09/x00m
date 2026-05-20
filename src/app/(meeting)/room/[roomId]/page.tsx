@@ -3,21 +3,23 @@ import { getCurrentUser } from "@/lib/userData";
 import RoomClient from "./RoomClient";
 
 type Props = {
-  params: {
+  params: Promise<{
     roomId: string;
-  };
+  }>;
 };
 
 export default async function RoomPage({ params }: Props) {
   const user = await getCurrentUser();
-
+  
   if (!user) {
     redirect("/");
   }
+  
+  const { roomId } = await params;
 
   return (
     <RoomClient
-      roomId={params.roomId}
+      roomId={roomId}
       user={{
         email: user.email,
         name: user.name,

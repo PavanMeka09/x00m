@@ -27,7 +27,7 @@ export default function RoomClient({ roomId, user }: Props) {
   const [role, setRole] = useState<"OFFERER" | "ANSWERER" | null>(null);
   const [mounted, setMounted] = useState(false);
 
-  // ✅ generate userId ONLY on client, after mount
+  // generate userId ONLY on client, after mount
   useEffect(() => {
     userIdRef.current = crypto.randomUUID().slice(0, 8);
     setMounted(true);
@@ -91,7 +91,7 @@ export default function RoomClient({ roomId, user }: Props) {
     };
   }, [mounted, roomId]);
 
-  // ✅ prevent SSR/client mismatch completely
+  // prevent SSR/client mismatch completely
   if (!mounted) {
     return null;
   }
