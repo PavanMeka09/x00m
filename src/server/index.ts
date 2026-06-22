@@ -10,7 +10,10 @@ type SignalMessage =
   | { type: "ROOM_FULL" }
   | { type: "OFFER"; roomId: string; from: string; to: string; sdp: RTCSessionDescriptionInit }
   | { type: "ANSWER"; roomId: string; from: string; to: string; sdp: RTCSessionDescriptionInit }
-  | { type: "ICE"; roomId: string; from: string; to: string; candidate: RTCIceCandidateInit };
+  | { type: "ICE"; roomId: string; from: string; to: string; candidate: RTCIceCandidateInit }
+  | { type: "DRAW"; roomId: string; from: string; to: string; x0: number; y0: number; x1: number; y1: number; color: string; lineWidth: number }
+  | { type: "CLEAR"; roomId: string; from: string; to: string }
+  | { type: "PEER_STATE"; roomId: string; from: string; to: string; isMuted: boolean; isCameraOff: boolean };
 
 type Room = Map<string, WebSocket>;
 const rooms = new Map<string, Room>();
@@ -80,7 +83,10 @@ wss.on("connection", (socket: RoomSocket) => {
 
       case "OFFER":
       case "ANSWER":
-      case "ICE": {
+      case "ICE":
+      case "DRAW":
+      case "CLEAR":
+      case "PEER_STATE": {
         const room = rooms.get(msg.roomId);
         if (!room) return;
 
