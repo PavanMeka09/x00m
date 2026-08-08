@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "dev:socket": "ts-node src/server/index.ts",
+    "dev:socket": "tsx src/server/index.ts",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -35,10 +35,13 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/ws": "^8.18.1",
+    "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "15.3.4",
     "prisma": "^7.3.0",
     "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.23.11",
     "tw-animate-css": "^1.3.4",
     "typescript": "^5"
   }
